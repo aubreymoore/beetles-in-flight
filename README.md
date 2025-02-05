@@ -30,3 +30,8 @@ The YouTube download program, ```yt-dlp```, is used to download the best quality
 ```
 yt-dlp -f bestvideo https://www.youtube.com/watch?v=IUQSZHr9h9Q 
 ```
+
+### opencv (cv2)
+```
+uv add opencv-python
+```
