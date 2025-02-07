@@ -8,6 +8,7 @@ dependencies = [
     "icecream>=2.1.4",
     "matplotlib>=3.10.0",
     "opencv-python>=4.11.0.86",
+    "scipy>=1.15.1",
     "yt-dlp>=2025.1.26",
 ]
 
