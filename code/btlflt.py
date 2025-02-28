@@ -267,3 +267,34 @@ def freq_from_autocorr(sig, fs):
     px, py = parabolic(corr, peak)
 
     return fs / px
+
+def video2frames(video_path: str, images_dir: str, image_fname_pattern: str='%04d.png')->None:
+    """
+    Converts a video file into an image sequence.
+    """
+    if os.path.exists(images_dir):
+        print(f'Images directory {images_dir} already exists. Skipping video2frames conversion.')
+    else:
+        os.makedirs(images_dir)
+        command = f'ffmpeg -r 1 -i {video_path} -r 1 {images_dir}/{image_fname_pattern}'
+        os.system(command)
+        
+
+def frames2video(images_dir: str, video_path: str, image_fname_pattern: str='%04d.png', fps:int=30)->None:
+    """
+    Converts an image sequence into a video file.
+    """
+    if os.path.exists(video_path):
+        print(f'Video file {video_path} already exists. Skipping frames2video conversion.')
+    else:
+        # command = f'ffmpeg -r {fps} -s {size} -i {images_dir}/{image_fname_pattern} -vcodec libx264 -crf 28 {video_path}'
+        command = f'ffmpeg -r {fps} -i {images_dir}/{image_fname_pattern} -vcodec libx264 -crf 28 {video_path}'
+        os.system(command)
+        
+# # test video2frames and frames2video round trip
+# os.system('rm -rf test')        
+# os.system('mkdir test')
+# os.system('cp animation.mp4 test/animation.mp4')
+# video2frames(video_path='test/animation.mp4', images_dir='test/frames')
+# frames2video(images_dir='test/frames', video_path='test/animation2.mp4')
+             
