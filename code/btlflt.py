@@ -12,6 +12,7 @@ from scipy.io import wavfile
 import wave
 from scipy.signal import butter, lfilter, correlate, freqz
 from scipy.fft import rfft, rfftfreq
+import ffmpeg
 
 def create_square_wav(filepath:str, sample_rate:int, frequency:float, duration:float)->None:
     """ 
@@ -276,8 +277,15 @@ def video2frames(video_path: str, images_dir: str, image_fname_pattern: str='%04
         print(f'Images directory {images_dir} already exists. Skipping video2frames conversion.')
     else:
         os.makedirs(images_dir)
-        command = f'ffmpeg -r 1 -i {video_path} -r 1 {images_dir}/{image_fname_pattern}'
-        os.system(command)
+        # command = f'ffmpeg -r 1 -i {video_path} -r 1 {images_dir}/{image_fname_pattern}'
+        # os.system(command)
+        (
+            ffmpeg
+            .input(video_path)
+            .output(f'{images_dir}/{image_fname_pattern}')
+            .run()
+        )
+
         
 
 def frames2video(images_dir: str, video_path: str, image_fname_pattern: str='%04d.png', fps:int=30)->None:
@@ -287,11 +295,18 @@ def frames2video(images_dir: str, video_path: str, image_fname_pattern: str='%04
     if os.path.exists(video_path):
         print(f'Video file {video_path} already exists. Skipping frames2video conversion.')
     else:
-        # command = f'ffmpeg -r {fps} -s {size} -i {images_dir}/{image_fname_pattern} -vcodec libx264 -crf 28 {video_path}'
-        command = f'ffmpeg -r {fps} -i {images_dir}/{image_fname_pattern} -vcodec libx264 -crf 28 {video_path}'
-        os.system(command)
+        # command = f'ffmpeg -r {fps} -i {images_dir}/{image_fname_pattern} -vcodec libx264 -crf 28 {video_path}'
+        # os.system(command)
+        (
+            ffmpeg
+            .input(f'{images_dir}/{image_fname_pattern}', framerate=fps)
+            .output(video_path, crf=28)
+            .run()
+        )
         
 # # test video2frames and frames2video round trip
+# # Results will be in the 'test' directory
+# 
 # os.system('rm -rf test')        
 # os.system('mkdir test')
 # os.system('cp animation.mp4 test/animation.mp4')
