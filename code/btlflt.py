@@ -95,8 +95,6 @@ def plot_time_frequency(samplerate, data):
     Plots data in the time domain and the frequency domain.
     The figure and its 2 sets of axes are returned so that these objects can be modified.
     """
-    ic(samplerate)
-    ic(data.shape)
     duration = data.shape[0] / samplerate
     time = np.linspace(0., duration, data.shape[0])
 
@@ -118,11 +116,6 @@ def plot_time_frequency(samplerate, data):
     
     return fig, (axt, axf)
 
-# NEEDS CHANGES
-# wavefile_path = 'square_wave.wav'        
-# fig, (axt, axf) = plot_time_frequency(wavefile_path)
-# fig.suptitle(f'{wavefile_path} | fundamental freqency = ???')
-# axf.set_xlim(0, 100)
 
 def create_frame_intensity_figure(frame_num, seconds_list, intensity_list, frame_path, fig_path):
     """
@@ -304,12 +297,32 @@ def frames2video(images_dir: str, video_path: str, image_fname_pattern: str='%04
             .run()
         )
         
-# # test video2frames and frames2video round trip
-# # Results will be in the 'test' directory
-# 
-# os.system('rm -rf test')        
-# os.system('mkdir test')
-# os.system('cp animation.mp4 test/animation.mp4')
-# video2frames(video_path='test/animation.mp4', images_dir='test/frames')
-# frames2video(images_dir='test/frames', video_path='test/animation2.mp4')
-             
+        
+def remove_background(input_image_path:str, output_image_path:str, lo_thresh:int=140, hi_thresh:int=255)->None: 
+    """ 
+    Remove the background from an image using a binary threshold and saves in output_image_path.
+    """
+    image = cv2.imread(input_image_path)
+
+    # Convert the image to RGB (OpenCV loads images in BGR format)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY)
+
+    # Apply a binary threshold to the image
+    _, binary = cv2.threshold(gray, lo_thresh, hi_thresh, cv2.THRESH_BINARY_INV)
+
+    # Find contours in the binary image
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create a mask with the same dimensions as the image, filled with zeros (black)
+    mask = np.zeros_like(image_rgb)
+
+    # Draw the contours on the mask
+    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    # Bitwise-and the mask and the original image
+    result = cv2.bitwise_and(image_rgb, mask)
+    
+    cv2.imwrite(output_image_path, cv2.cvtColor(result, cv2.COLOR_RGB2BGR))
