@@ -1,7 +1,7 @@
 """ 
-# btlflt.py
+**btlflt.py**
 
-This file contains `code` for analyzing images extracted from the Beetles in Flight video
+This file contains code for analyzing images extracted from the Beetles in Flight video
 """
 
 import os
@@ -76,9 +76,6 @@ def convert_wav_from_float64_to_int16(src_wav_path, dest_wav_path):
 
 # calc_intensity_list(FRAMES_DIR, FIRST_FRAME_NUM, LAST_FRAME_NUM)
 
-"""
-cacapoopoo
-"""
 
 def calc_intensity_time_series(images_dir:str, first_image:int, last_image:int)->None:
     """
