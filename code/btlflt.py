@@ -1,6 +1,8 @@
+""" 
 # btlflt.py
-#
-# This file contains code for analyzing images extracted from the Beetles in Flight video
+
+This file contains `code` for analyzing images extracted from the Beetles in Flight video
+"""
 
 import os
 import cv2
@@ -13,6 +15,16 @@ import wave
 from scipy.signal import butter, lfilter, correlate, freqz
 from scipy.fft import rfft, rfftfreq
 import ffmpeg
+
+def create_grayscale_image(image_path:str, output_path:str)->None:
+    """
+    Converts a color image to grayscale and saves it.
+    """
+    img = cv2.imread(image_path, 0)
+    cv2.imwrite(output_path, img)
+    
+# create_grayscale_image('code/frames/0001.png', 'gray.png')
+
 
 def create_square_wav(filepath:str, sample_rate:int, frequency:float, duration:float)->None:
     """ 
@@ -64,7 +76,11 @@ def convert_wav_from_float64_to_int16(src_wav_path, dest_wav_path):
 
 # calc_intensity_list(FRAMES_DIR, FIRST_FRAME_NUM, LAST_FRAME_NUM)
 
-def calc_intensity_time_series(images_dir:str, first_image:int, last_image:int, normalize:bool=True):
+"""
+cacapoopoo
+"""
+
+def calc_intensity_time_series(images_dir:str, first_image:int, last_image:int)->None:
     """
     Calculates the average intensity of pixels within each frame of the video scene.
     If normalize is True, intensity_list will be normalized so that mean is zero and range is -1 to 1.
@@ -74,21 +90,10 @@ def calc_intensity_time_series(images_dir:str, first_image:int, last_image:int, 
         image = cv2.imread(f'{images_dir}/{image_num:04d}.png', cv2.IMREAD_GRAYSCALE)
         intensity = np.mean(image)
         intensity_list.append(intensity)
-    if normalize:
-        intensity_list = normalize_array(intensity_list)
     return intensity_list
 
 # calc_intensity_list(FRAMES_DIR, FIRST_FRAME_NUM, LAST_FRAME_NUM)
 
-def normalize_array(arr):
-    """ 
-    Normalize array to range between -0.99 and 0.99 with a mean of 0.
-    """ 
-    arr = arr - np.mean(arr)
-    scale_factor = 0.99 * max(abs(np.min(arr)), np.max(arr))
-    return arr / scale_factor
-
-# normalized_intensity_list = normalize_array(intensity_list)
 
 def plot_time_frequency(samplerate, data):
     """
@@ -226,6 +231,7 @@ def create_wav_file(filename:str, data:np.array, framerate:int=44100)->None:
     data is a numpy array with elements ranging between -1.0 and 1.0 inclusive
     data is rescaled to range between -32767 and +32767 stored in little-endian format
     """
+    data = normalize_array(data) # normalize data to range between -0.99 and 0.99
     data = np.clip(np.round(data * 32767), -32767, 32767).astype("<h")
     with wave.open(filename, mode="wb") as wav_file:
         wav_file.setframerate(framerate)
@@ -298,9 +304,10 @@ def frames2video(images_dir: str, video_path: str, image_fname_pattern: str='%04
         )
         
         
-def remove_background(input_image_path:str, output_image_path:str, lo_thresh:int=140, hi_thresh:int=255)->None: 
+def remove_background(input_image_path:str, output_image_path:str, mask_path:str, thresh:int=140, maxval:int=255)->None: 
     """ 
     Remove the background from an image using a binary threshold and saves in output_image_path.
+    The mask is saved as a binary image.
     """
     image = cv2.imread(input_image_path)
 
@@ -311,7 +318,7 @@ def remove_background(input_image_path:str, output_image_path:str, lo_thresh:int
     gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY)
 
     # Apply a binary threshold to the image
-    _, binary = cv2.threshold(gray, lo_thresh, hi_thresh, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, thresh, maxval, cv2.THRESH_BINARY_INV)
 
     # Find contours in the binary image
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -325,4 +332,26 @@ def remove_background(input_image_path:str, output_image_path:str, lo_thresh:int
     # Bitwise-and the mask and the original image
     result = cv2.bitwise_and(image_rgb, mask)
     
+    # Save the mask 
+    cv2.imwrite(mask_path, mask)
+    
+    # Save the masked image
     cv2.imwrite(output_image_path, cv2.cvtColor(result, cv2.COLOR_RGB2BGR))
+
+
+def normalize_array(arr:np.array)->np.array:
+    """ 
+    Normalize a 1d array to range between -0.99 and 0.99 with a mean of 0.
+    """ 
+    
+    # set mean to zero
+    arr = arr - np.mean(arr)
+    
+    # calculate scale factor
+    scale_factor = 0.99 / max(abs(np.min(arr)), np.max(arr))
+    return scale_factor * arr
+
+# for i in range(10):
+#     data = np.random.uniform(low=0, high=255, size=10)
+#     normalized_data = normalize_array(data)
+#     print(f'{i}   {np.mean(normalized_data)=:.2f}   {np.min(normalized_data)=:.2f}   {np.max(normalized_data)=:.2f}')
