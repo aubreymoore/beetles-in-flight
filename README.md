@@ -1,3 +1,5 @@
+<https://github.com/aubreymoore/beetles-in-flight/blob/main/docs/build/html/index.html>
+
 [Code documentation (sphinx)](https://aubreymoore.github.io/beetles-in-flight/blob/main/docs/build/_static/html/index.html)
 
 ## Technical notes
