@@ -1,3 +1,5 @@
+[Code documentation (sphinx)]<https://aubreymoore.github.io/beetles-in-flight/blob/main/docs/build/html/index.html>
+
 ## Technical notes
 
 ### UV project initiation
